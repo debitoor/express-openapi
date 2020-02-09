@@ -1,0 +1,80 @@
+{
+	"openapi": "3.0.0",
+	"info": {
+		"version": "1.0.0",
+		"title": "OpenAPI"
+	},
+	"tags": [
+		{
+			"name": "Tests"
+		}
+	],
+	"paths": {
+		"/tests": {
+			"get": {
+				"summary": "Tests",
+				"operationId": "getTests",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TestList"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request"
+					},
+					"401": {
+						"description": "Unauthorized"
+					}
+				},
+				"tags": [
+					"Tests"
+				]
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"Bearer": {
+				"type": "http",
+				"scheme": "Bearer"
+			}
+		},
+		"schemas": {
+			"Test": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/TestID"
+					},
+					"name": {
+						"$ref": "#/components/schemas/TestName"
+					}
+				}
+			},
+			"TestList": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/Test"
+				}
+			},
+			"TestID": {
+				"type": "integer"
+			},
+			"TestName": {
+				"type": "string"
+			}
+		}
+	},
+	"security": [
+		{
+			"Bearer": []
+		}
+	]
+}
