@@ -23,9 +23,9 @@ function createOpenApiRouter(openapi, { operations = {}, security = {}, schemas 
 			const requestSchema = {
 				type: 'object',
 				properties: {
-					params: parametersToSchema((openapi.parameters || []).filter(parameter => parameter.in === 'path')),
-					query: parametersToSchema((openapi.parameters || []).filter(parameter => parameter.in === 'query')),
-					body: requestBodyToSchema(openapi.requestBody)
+					params: parametersToSchema((operation.parameters || []).filter(parameter => parameter.in === 'path')),
+					query: parametersToSchema((operation.parameters || []).filter(parameter => parameter.in === 'query')),
+					body: requestBodyToSchema(operation.requestBody)
 				},
 				required: [],
 				components: openapi.components
