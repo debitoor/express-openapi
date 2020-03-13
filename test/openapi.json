@@ -36,6 +36,19 @@
 				"tags": [
 					"Tests"
 				]
+			},
+			"delete": {
+				"summary": "Delete Tests",
+				"operationId": "deleteTests",
+				"parameters": [],
+				"responses": {
+					"204": {
+						"description": "OK"
+					}
+				},
+				"tags": [
+					"Tests"
+				]
 			}
 		}
 	},

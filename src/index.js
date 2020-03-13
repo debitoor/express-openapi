@@ -52,9 +52,13 @@ function createOpenApiRouter(openapi, { operations = {}, security = {}, schemas 
 					const response = await request();
 
 					// TODO: Content Type Formatters
-					res
-						.status(response.statusCode)
-						.json(response.content);
+					res.status(response.statusCode);
+
+					if (response.content) {
+						res.json(response.content);
+					} else {
+						res.end();
+					}
 
 					async function request() {
 						const operationSecurity = operation.security || openapi.security || [];
@@ -127,30 +131,32 @@ function createOpenApiRouter(openapi, { operations = {}, security = {}, schemas 
 							return { statusCode: 500 };
 						}
 
-						const operationResponseContent = operationResponse.content[accept];
+						if (operationResponse.content) {
+							const operationResponseContent = operationResponse.content[accept];
 
-						if (operationResponseContent === null || operationResponseContent === undefined) {
-							debug('operationResponseContent is null or undefined.');
+							if (operationResponseContent === null || operationResponseContent === undefined) {
+								debug('operationResponseContent is null or undefined.');
 
-							return { statusCode: 406 };
-						}
-
-						if (typeof operationResponseContent.validate === 'function') {
-							debug('operationResponseContent.validate is a function.');
-
-							const isValidResponseContent = operationResponseContent.validate(response.content);
-
-							debug('isValidResponseContent === %', isValidResponseContent);
-
-							if (isValidResponseContent === false) {
-								debug('isValidResponseContent: %O', operationResponseContent.validate.errors);
-
-								return {
-									statusCode: 500
-								};
+								return { statusCode: 406 };
 							}
-						} else {
-							debug('operationResponseContent.validate is not a function.');
+
+							if (typeof operationResponseContent.validate === 'function') {
+								debug('operationResponseContent.validate is a function.');
+
+								const isValidResponseContent = operationResponseContent.validate(response.content);
+
+								debug('isValidResponseContent === %', isValidResponseContent);
+
+								if (isValidResponseContent === false) {
+									debug('isValidResponseContent: %O', operationResponseContent.validate.errors);
+
+									return {
+										statusCode: 500
+									};
+								}
+							} else {
+								debug('operationResponseContent.validate is not a function.');
+							}
 						}
 
 						// If everything is still OK we return the origianl response from the handler function.
@@ -180,12 +186,12 @@ function parametersToSchema(parameters) {
 					description: parameter.description,
 					...parameter.schema
 				}
-			},
-			additionalProperties: false
+			}
 		};
 	}, {
 		type: 'object',
 		properties: {},
+		additionalProperties: false,
 		required: parameters.filter(parameter => parameter.required === true).map(parameter => parameter.name)
 	});
 }

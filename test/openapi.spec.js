@@ -16,6 +16,9 @@ describe('openapi', () => {
 		};
 
 		const operations = {
+			deleteTests: () => ({
+				statusCode: 204
+			}),
 			getTests: () => ({
 				statusCode: 200,
 				content: [{
@@ -30,31 +33,54 @@ describe('openapi', () => {
 		app.listen(PORT, done);
 	});
 
-	let response;
+	describe('get', () => {
+		let response;
 
-	before(async () => {
-		response = await nodeFetch('http://localhost:58483/tests', {
-			headers: {
-				Accept: 'application/json',
-				Authorization: 'Bearer Jane'
-			}
+		before(async () => {
+			response = await nodeFetch('http://localhost:58483/tests', {
+				headers: {
+					Accept: 'application/json',
+					Authorization: 'Bearer Jane'
+				}
+			});
+			response.content = await response.json();
 		});
-		response.content = await response.json();
+
+		describe('response', () => {
+			describe('statusCode', () => {
+				it('should equal 200', () => {
+					expect(response.status).to.eql(200);
+				});
+			});
+
+			describe('content', () => {
+				it('should be an array with one test item', () => {
+					expect(response.content).to.eql([{
+						'id': 1,
+						'name': 'Test 1'
+					}]);
+				});
+			});
+		});
 	});
 
-	describe('response', () => {
-		describe('statusCode', () => {
-			it('should equal 200', () => {
-				expect(response.status).to.eql(200);
+	describe('delete', () => {
+		let response;
+
+		before(async () => {
+			response = await nodeFetch('http://localhost:58483/tests', {
+				method: 'DELETE',
+				headers: {
+					Authorization: 'Bearer Jane'
+				}
 			});
 		});
 
-		describe('content', () => {
-			it('should be an array with one test item', () => {
-				expect(response.content).to.eql([{
-					'id': 1,
-					'name': 'Test 1'
-				}]);
+		describe('response', () => {
+			describe('statusCode', () => {
+				it('should equal 204', () => {
+					expect(response.status).to.eql(204);
+				});
 			});
 		});
 	});
