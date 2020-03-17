@@ -5,7 +5,7 @@ const Ajv = require('ajv');
 module.exports.createOpenApiRouter = createOpenApiRouter;
 
 function createOpenApiRouter(openapi, { operations = {}, security = {}, schemas = [] } = {}) {
-	const ajv = new Ajv({ $data: true, coerceTypes: true, allErrors: true, useDefaults: true });
+	const ajv = new Ajv({ $data: true, coerceTypes: true, allErrors: true, useDefaults: true, nullable: true, removeAdditional: true });
 
 	if (Array.isArray(schemas)) {
 		schemas.forEach(schema => ajv.addSchema(schema));
