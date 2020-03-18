@@ -48,13 +48,26 @@
 				},
 				"tags": [
 					"Tests"
+				],
+				"security": [
+					{
+						"Bearer3": []
+					}
 				]
 			}
 		}
 	},
 	"components": {
 		"securitySchemes": {
-			"Bearer": {
+			"Bearer1": {
+				"type": "http",
+				"scheme": "Bearer"
+			},
+			"Bearer2": {
+				"type": "http",
+				"scheme": "Bearer"
+			},
+			"Bearer3": {
 				"type": "http",
 				"scheme": "Bearer"
 			}
@@ -87,7 +100,10 @@
 	},
 	"security": [
 		{
-			"Bearer": []
+			"Bearer1": []
+		},
+		{
+			"Bearer2": []
 		}
 	]
 }

@@ -4,7 +4,7 @@ const Ajv = require('ajv');
 
 module.exports.createOpenApiRouter = createOpenApiRouter;
 
-function createOpenApiRouter(openapi, { operations = {}, security = {}, schemas = [] } = {}) {
+function createOpenApiRouter(openapi, { operations = {}, securitySchemes = {}, schemas = [] } = {}) {
 	const ajv = new Ajv({ $data: true, coerceTypes: true, allErrors: true, useDefaults: true, nullable: true, removeAdditional: true });
 
 	if (Array.isArray(schemas)) {
@@ -61,50 +61,83 @@ function createOpenApiRouter(openapi, { operations = {}, security = {}, schemas 
 					}
 
 					async function request() {
-						const operationSecurity = operation.security || openapi.security || [];
+						const operationSecurityRequirements = operation.security || openapi.security || [];
 
-						for (let securityRequirements of operationSecurity) {
-							for (let securitySchemeName in securityRequirements) {
+						let security;
+
+						let hasMetOperationSecurityRequirements = true;
+
+						for (let securitySchemeNames of operationSecurityRequirements) {
+							security = {};
+							hasMetOperationSecurityRequirements = true;
+
+							for (let securitySchemeName in securitySchemeNames) {
 								const securityScheme = openapi.components.securitySchemes[securitySchemeName];
-								const securitySchemeHandler = security[securitySchemeName];
+								const securitySchemeHandler = securitySchemes[securitySchemeName];
 
-								if (!securityScheme) {
-									return { statusCode: 401, content: 'Security Scheme Not Supported.' };
+								try {
+									security[securitySchemeName] = await checkSecurityScheme(securityScheme, securitySchemeHandler);
+									hasMetOperationSecurityRequirements = true;
+								} catch (err) {
+									hasMetOperationSecurityRequirements = false;
 								}
 
-								if (!securitySchemeHandler) {
-									return { statusCode: 401, content: 'Security Scheme Not Supported.' };
-								}
-
-								switch (securityScheme.type) {
-									case 'http':
-										const authorizationHeader = req.get('Authorization');
-
-										if (authorizationHeader === null || authorizationHeader === undefined) {
-											return { statusCode: 401, content: 'Authorization Header Missing.' };
-										}
-
-										const [ type, credentials ] = authorizationHeader.split(' ');
-
-										if (type !== securityScheme.scheme) {
-											return { statusCode: 401, content: 'Authorization Header Type Not Supported.' };
-										}
-
-										if (credentials === undefined) {
-											return { statusCode: 401, content: 'Authorization Header Credentials Missing' };
-										}
-
-										const credentialsPayload = await securitySchemeHandler(credentials);
-
-										if (credentialsPayload === null || credentialsPayload === undefined) {
-											return { statusCode: 401, content: 'Authorization Header Credentials Invalid' };
-										}
-
-										break;
-									default:
-										return { statusCode: 401, content: 'Security Scheme Type Not Supported.' };
+								if (!hasMetOperationSecurityRequirements) {
+									break;
 								}
 							}
+
+							if (hasMetOperationSecurityRequirements) {
+								break;
+							}
+						}
+
+						async function checkSecurityScheme(securityScheme, securitySchemeHandler) {
+							if (!securityScheme) {
+								throw new Error('Security Scheme Not Supported');
+							}
+
+							if (!securitySchemeHandler) {
+								throw new Error('Security Scheme Not Supported');
+							}
+
+							switch (securityScheme.type) {
+								case 'http':
+									const authorizationHeader = req.get('Authorization');
+
+									if (authorizationHeader === null || authorizationHeader === undefined) {
+										throw new Error('Authorization Header Missing');
+									}
+
+									const [ type, credentials ] = authorizationHeader.split(' ');
+
+									if (type !== securityScheme.scheme) {
+										throw new Error('Authorization Header Type Not Supported');
+									}
+
+									if (credentials === undefined) {
+										throw new Error('Authorization Header Credentials Missing');
+									}
+
+									const credentialsPayload = await securitySchemeHandler(credentials);
+
+									if (credentialsPayload === null || credentialsPayload === undefined) {
+										throw new Error('Authorization Header Credentials Invalid');
+									}
+
+									return credentialsPayload;
+								default:
+									throw new Error('Security Scheme Type Not Supported');
+							}
+						}
+
+						debug('hasMetOperationSecurityRequirements: %b', hasMetOperationSecurityRequirements);
+
+						if (!hasMetOperationSecurityRequirements) {
+							return {
+								statusCode: 401,
+								content: 'Authorization Error'
+							};
 						}
 
 						const isValidRequest = validateRequest({ headers, params, query, body });
@@ -115,7 +148,13 @@ function createOpenApiRouter(openapi, { operations = {}, security = {}, schemas 
 							return { statusCode: 400, body: isValidRequest };
 						}
 
-						const response = await op({ headers, params, query, body });
+						const response = await op({
+							headers,
+							params,
+							query,
+							body,
+							security
+						});
 
 						debug('response === %O', response);
 

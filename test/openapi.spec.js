@@ -11,24 +11,50 @@ describe('openapi', () => {
 	before('express', done => {
 		app = express();
 
-		const security = {
-			Bearer: () => ({ sub: 'jane' })
-		};
-
 		const operations = {
 			deleteTests: () => ({
 				statusCode: 204
 			}),
-			getTests: () => ({
-				statusCode: 200,
-				content: [{
-					id: 1,
-					name: 'Test 1'
-				}]
-			})
+			getTests: ({ security }) => {
+				return {
+					statusCode: 200,
+					content: [{
+						id: 1,
+						name: 'Test 1',
+						security
+					}]
+				};
+			}
 		};
 
-		app.use(createOpenApiRouter(openapi, { security, operations }));
+		const securitySchemes = {
+			Bearer1: async (credentials) => {
+				if (credentials === 'Jane') {
+					return {
+						sub: credentials,
+						iss: 'Bearer1'
+					};
+				}
+			},
+			Bearer2: async (credentials) => {
+				if (credentials === 'John') {
+					return {
+						sub: credentials,
+						iss: 'Bearer2'
+					};
+				}
+			},
+			Bearer3: async (credentials) => {
+				if (credentials === 'June') {
+					return {
+						sub: credentials,
+						iss: 'Bearer3'
+					};
+				}
+			}
+		};
+
+		app.use(createOpenApiRouter(openapi, { operations, securitySchemes }));
 
 		app.listen(PORT, done);
 	});
@@ -40,7 +66,7 @@ describe('openapi', () => {
 			response = await nodeFetch('http://localhost:58483/tests', {
 				headers: {
 					Accept: 'application/json',
-					Authorization: 'Bearer Jane'
+					Authorization: 'Bearer John'
 				}
 			});
 			response.content = await response.json();
@@ -56,8 +82,14 @@ describe('openapi', () => {
 			describe('content', () => {
 				it('should be an array with one test item', () => {
 					expect(response.content).to.eql([{
-						'id': 1,
-						'name': 'Test 1'
+						id: 1,
+						name: 'Test 1',
+						security: {
+							Bearer2: {
+								iss: 'Bearer2',
+								sub: 'John'
+							}
+						}
 					}]);
 				});
 			});
@@ -71,7 +103,7 @@ describe('openapi', () => {
 			response = await nodeFetch('http://localhost:58483/tests', {
 				method: 'DELETE',
 				headers: {
-					Authorization: 'Bearer Jane'
+					Authorization: 'Bearer June'
 				}
 			});
 		});
