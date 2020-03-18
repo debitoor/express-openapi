@@ -48,14 +48,14 @@ describe('openapi', () => {
 			Bearer2: async (credentials) => {
 				if (credentials === 'John') {
 					return {
-						sub: credentials
+						name: credentials
 					};
 				}
 			},
 			Bearer3: async (credentials) => {
 				if (credentials === 'June') {
 					return {
-						sub: credentials
+						name: credentials
 					};
 				}
 			}
