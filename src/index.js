@@ -105,7 +105,7 @@ function createOpenApiRouter(openapi, { operations = {}, securitySchemes = {}, s
 								case 'http':
 									const authorizationHeader = req.get('Authorization');
 
-									if (authorizationHeader === null || authorizationHeader === undefined) {
+									if (authorizationHeader == null) {
 										throw new Error('Authorization Header Missing');
 									}
 
@@ -121,7 +121,7 @@ function createOpenApiRouter(openapi, { operations = {}, securitySchemes = {}, s
 
 									const credentialsPayload = await securitySchemeHandler(credentials);
 
-									if (credentialsPayload === null || credentialsPayload === undefined) {
+									if (credentialsPayload == null) {
 										throw new Error('Authorization Header Credentials Invalid');
 									}
 
@@ -164,7 +164,7 @@ function createOpenApiRouter(openapi, { operations = {}, securitySchemes = {}, s
 
 						const operationResponse = operation.responses[response.statusCode] || operation.responses['default'];
 
-						if (operationResponse === null || operationResponse === undefined) {
+						if (operationResponse == null) {
 							debug('operationResponse is null or undefined.');
 
 							return { statusCode: 500 };
@@ -173,7 +173,7 @@ function createOpenApiRouter(openapi, { operations = {}, securitySchemes = {}, s
 						if (operationResponse.content) {
 							const operationResponseContent = operationResponse.content[accept];
 
-							if (operationResponseContent === null || operationResponseContent === undefined) {
+							if (operationResponseContent == null) {
 								debug('operationResponseContent is null or undefined.');
 
 								return { statusCode: 406 };
