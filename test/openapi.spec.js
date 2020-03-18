@@ -11,18 +11,22 @@ describe('openapi', () => {
 	before('express', done => {
 		app = express();
 
+		const tests = [{ id: 1 }, { id: 2 }];
+
 		const operations = {
-			deleteTests: () => ({
+			deleteTest: () => ({
 				statusCode: 204
 			}),
-			getTests: ({ security }) => {
+			getTests: () => {
 				return {
 					statusCode: 200,
-					content: [{
-						id: 1,
-						name: 'Test 1',
-						security
-					}]
+					content: tests
+				};
+			},
+			findTest: ({ params }) => {
+				return {
+					statusCode: 200,
+					content: tests.find(test => test.id === params.testId)
 				};
 			}
 		};
@@ -59,11 +63,61 @@ describe('openapi', () => {
 		app.listen(PORT, done);
 	});
 
-	describe('get', () => {
+	describe('getTests with Jane', () => {
 		let response;
 
 		before(async () => {
 			response = await nodeFetch('http://localhost:58483/tests', {
+				headers: {
+					Accept: 'application/json',
+					Authorization: 'Bearer Jane'
+				}
+			});
+			response.content = await response.json();
+		});
+
+		describe('response', () => {
+			describe('statusCode', () => {
+				it('should equal 200', () => {
+					expect(response.status).to.eql(200);
+				});
+			});
+
+			describe('content', () => {
+				it('should be an array with two test items', () => {
+					expect(response.content).to.eql([{ id: 1 }, { id: 2 }]);
+				});
+			});
+		});
+	});
+
+	describe('getTests with June', () => {
+		let response;
+
+		before(async () => {
+			response = await nodeFetch('http://localhost:58483/tests', {
+				headers: {
+					Accept: 'application/json',
+					Authorization: 'Bearer June'
+				}
+			});
+			response.content = await response.json();
+		});
+
+		describe('response', () => {
+			describe('statusCode', () => {
+				it('should equal 401', () => {
+					expect(response.status).to.eql(401);
+				});
+			});
+		});
+	});
+
+	describe('findTest with John', () => {
+		let response;
+
+		before(async () => {
+			response = await nodeFetch('http://localhost:58483/tests/2', {
 				headers: {
 					Accept: 'application/json',
 					Authorization: 'Bearer John'
@@ -80,27 +134,40 @@ describe('openapi', () => {
 			});
 
 			describe('content', () => {
-				it('should be an array with one test item', () => {
-					expect(response.content).to.eql([{
-						id: 1,
-						name: 'Test 1',
-						security: {
-							Bearer2: {
-								iss: 'Bearer2',
-								sub: 'John'
-							}
-						}
-					}]);
+				it('should be an object', () => {
+					expect(response.content).to.eql({ id: 2 });
 				});
 			});
 		});
 	});
 
-	describe('delete', () => {
+	describe('findTest with June', () => {
 		let response;
 
 		before(async () => {
-			response = await nodeFetch('http://localhost:58483/tests', {
+			response = await nodeFetch('http://localhost:58483/tests/2', {
+				headers: {
+					Accept: 'application/json',
+					Authorization: 'Bearer June'
+				}
+			});
+			response.content = await response.json();
+		});
+
+		describe('response', () => {
+			describe('statusCode', () => {
+				it('should equal 401', () => {
+					expect(response.status).to.eql(401);
+				});
+			});
+		});
+	});
+
+	describe('deleteTest with June', () => {
+		let response;
+
+		before(async () => {
+			response = await nodeFetch('http://localhost:58483/tests/1', {
 				method: 'DELETE',
 				headers: {
 					Authorization: 'Bearer June'

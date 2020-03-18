@@ -36,11 +36,52 @@
 				"tags": [
 					"Tests"
 				]
+			}
+		},
+		"/tests/{testId}": {
+			"get": {
+				"summary": "Find Test",
+				"operationId": "findTest",
+				"parameters": [{
+					"name": "testId",
+					"in": "path",
+					"required": true,
+					"schema":{
+						"type": "integer"
+					}
+				}],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Test"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Tests"
+				],
+				"security": [
+					{
+						"Bearer2": []
+					}
+				]
 			},
 			"delete": {
-				"summary": "Delete Tests",
-				"operationId": "deleteTests",
-				"parameters": [],
+				"summary": "Delete Test",
+				"operationId": "deleteTest",
+				"parameters": [{
+					"name": "testId",
+					"in": "path",
+					"required": true,
+					"schema":{
+						"type": "string"
+					}
+				}],
 				"responses": {
 					"204": {
 						"description": "OK"
