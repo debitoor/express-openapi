@@ -28,6 +28,12 @@ describe('openapi', () => {
 					statusCode: 200,
 					content: tests.find(test => test.id === params.testId)
 				};
+			},
+			getUser: ({ security }) => {
+				return {
+					statusCode: 200,
+					content: security
+				};
 			}
 		};
 
@@ -35,24 +41,21 @@ describe('openapi', () => {
 			Bearer1: async (credentials) => {
 				if (credentials === 'Jane') {
 					return {
-						sub: credentials,
-						iss: 'Bearer1'
+						name: credentials
 					};
 				}
 			},
 			Bearer2: async (credentials) => {
 				if (credentials === 'John') {
 					return {
-						sub: credentials,
-						iss: 'Bearer2'
+						sub: credentials
 					};
 				}
 			},
 			Bearer3: async (credentials) => {
 				if (credentials === 'June') {
 					return {
-						sub: credentials,
-						iss: 'Bearer3'
+						sub: credentials
 					};
 				}
 			}
@@ -179,6 +182,60 @@ describe('openapi', () => {
 			describe('statusCode', () => {
 				it('should equal 204', () => {
 					expect(response.status).to.eql(204);
+				});
+			});
+		});
+	});
+
+	describe('get user with June', () => {
+		let response;
+
+		before(async () => {
+			response = await nodeFetch('http://localhost:58483/user', {
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					Authorization: 'Bearer June'
+				}
+			});
+
+			response.content = await response.json();
+		});
+
+		describe('response', () => {
+			describe('statusCode', () => {
+				it('should equal 401', () => {
+					expect(response.status).to.eql(401);
+				});
+			});
+		});
+	});
+
+	describe('get user with Jane', () => {
+		let response;
+
+		before(async () => {
+			response = await nodeFetch('http://localhost:58483/user', {
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					Authorization: 'Bearer Jane'
+				}
+			});
+
+			response.content = await response.json();
+		});
+
+		describe('response', () => {
+			describe('statusCode', () => {
+				it('should equal 200', () => {
+					expect(response.status).to.eql(200);
+				});
+			});
+
+			describe('content', () => {
+				it('should be a user object', () => {
+					expect(response.content).to.eql({ Bearer1: { name: 'Jane' } });
 				});
 			});
 		});

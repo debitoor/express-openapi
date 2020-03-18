@@ -96,6 +96,27 @@
 					}
 				]
 			}
+		},
+		"/user": {
+			"get": {
+				"summary": "Get User",
+				"operationId": "getUser",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				]
+			}
 		}
 	},
 	"components": {
@@ -135,6 +156,38 @@
 				"type": "integer"
 			},
 			"TestName": {
+				"type": "string"
+			},
+			"User": {
+				"type": "object",
+				"properties": {
+					"Bearer1": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
+					},
+					"Bearer2": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
+					},
+					"Bearer3": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
+					}
+				}
+			},
+			"UserName": {
 				"type": "string"
 			}
 		}
