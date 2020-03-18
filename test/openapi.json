@@ -36,11 +36,52 @@
 				"tags": [
 					"Tests"
 				]
+			}
+		},
+		"/tests/{testId}": {
+			"get": {
+				"summary": "Find Test",
+				"operationId": "findTest",
+				"parameters": [{
+					"name": "testId",
+					"in": "path",
+					"required": true,
+					"schema":{
+						"type": "integer"
+					}
+				}],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Test"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Tests"
+				],
+				"security": [
+					{
+						"Bearer2": []
+					}
+				]
 			},
 			"delete": {
-				"summary": "Delete Tests",
-				"operationId": "deleteTests",
-				"parameters": [],
+				"summary": "Delete Test",
+				"operationId": "deleteTest",
+				"parameters": [{
+					"name": "testId",
+					"in": "path",
+					"required": true,
+					"schema":{
+						"type": "string"
+					}
+				}],
 				"responses": {
 					"204": {
 						"description": "OK"
@@ -48,13 +89,47 @@
 				},
 				"tags": [
 					"Tests"
+				],
+				"security": [
+					{
+						"Bearer3": []
+					}
+				]
+			}
+		},
+		"/user": {
+			"get": {
+				"summary": "Get User",
+				"operationId": "getUser",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
 				]
 			}
 		}
 	},
 	"components": {
 		"securitySchemes": {
-			"Bearer": {
+			"Bearer1": {
+				"type": "http",
+				"scheme": "Bearer"
+			},
+			"Bearer2": {
+				"type": "http",
+				"scheme": "Bearer"
+			},
+			"Bearer3": {
 				"type": "http",
 				"scheme": "Bearer"
 			}
@@ -82,12 +157,47 @@
 			},
 			"TestName": {
 				"type": "string"
+			},
+			"User": {
+				"type": "object",
+				"properties": {
+					"Bearer1": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
+					},
+					"Bearer2": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
+					},
+					"Bearer3": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
+					}
+				}
+			},
+			"UserName": {
+				"type": "string"
 			}
 		}
 	},
 	"security": [
 		{
-			"Bearer": []
+			"Bearer1": []
+		},
+		{
+			"Bearer2": []
 		}
 	]
 }
