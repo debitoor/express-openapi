@@ -1,3 +1,0 @@
---exit
---timeout 100000
-./test/**/*.spec.js

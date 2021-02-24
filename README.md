@@ -1,13 +1,13 @@
 # express-openapi
 
-``` bash
-$ npm install @debitoor/express-openapi
+```bash
+$ npm install @practio/express-openapi
 ```
 
 ## Usage
 
-``` javascript
-const { createOpenApiRouter } = require('@debitoor/express-openapi');
+```javascript
+const { createOpenApiRouter } = require('@practio/express-openapi');
 const express = require('express');
 const openapi = require('./openapi.json');
 

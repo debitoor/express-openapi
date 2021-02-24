@@ -1,5 +1,5 @@
 {
-  "name": "@debitoor/express-openapi",
+  "name": "@practio/express-openapi",
   "version": "0.3.0",
   "description": "Express OpenAPI",
   "main": "src/index.js",
@@ -9,25 +9,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/debitoor/express-openapi.git"
+    "url": "git+https://github.com/practio/express-openapi.git"
   },
   "author": "Jonatan Pedersen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/debitoor/express-openapi/issues"
+    "url": "https://github.com/practio/express-openapi/issues"
   },
-  "homepage": "https://github.com/debitoor/express-openapi#readme",
+  "homepage": "https://github.com/practio/express-openapi#readme",
   "dependencies": {
-    "ajv": "^6.11.0",
-    "debug": "^4.1.1",
+    "ajv": "^7.1.1",
+    "debug": "^4.3.1",
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "@debitoor/eslint-config-debitoor": "3.0.2",
-    "chai": "4.2.0",
-    "cross-env": "7.0.0",
-    "mocha": "7.0.1",
-    "node-fetch": "2.6.0",
-    "mocha-eslint": "6.0.0"
+    "chai": "4.3.0",
+    "cross-env": "7.0.3",
+    "mocha": "8.3.0",
+    "node-fetch": "2.6.1"
+  },
+  "mocha": {
+    "exit": true
   }
 }
