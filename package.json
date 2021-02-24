@@ -12,7 +12,7 @@
     "url": "git+https://github.com/debitoor/express-openapi.git"
   },
   "author": "Jonatan Pedersen",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/debitoor/express-openapi/issues"
   },
