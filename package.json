@@ -1,6 +1,6 @@
 {
   "name": "@practio/express-openapi",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Express OpenAPI",
   "main": "src/index.js",
   "scripts": {
