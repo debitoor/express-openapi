@@ -6,7 +6,7 @@ $ npm install @practio/express-openapi
 
 ## Usage
 
-openapi.json:
+api.spec.yml:
 
 ```yml
 openapi: 3.0.0
@@ -79,11 +79,15 @@ main.js:
 ```javascript
 const { createOpenApiRouter } = require('@practio/express-openapi');
 const express = require('express');
-const openapi = require('./openapi.json');
+const fs = require('fs');
+const YAML = require('yaml');
+
+const apiSpecYml = fs.readFileSync('./api.spec.yml', 'utf8');
+const apiSpec = YAML.parse(apiSpecYml);
 
 const app = express();
 
-app.use(createOpenApiRouter(openapi, {
+app.use('/api/v1', createOpenApiRouter(apiSpec, {
   securitySchemes: { user },
   operations: { getVaccines }
 });
