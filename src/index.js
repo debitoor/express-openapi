@@ -200,7 +200,9 @@ function createOpenApiRouter(
               if (typeof operationResponseContent.validate === 'function') {
                 debug('operationResponseContent.validate is a function.');
 
-                const isValidResponseContent = operationResponseContent.validate(response.content);
+                const isValidResponseContent = operationResponseContent.validate(
+                  toJSON(response.content),
+                );
 
                 debug('isValidResponseContent === %', isValidResponseContent);
 
@@ -262,4 +264,8 @@ function parametersToSchema(parameters) {
         .map((parameter) => parameter.name),
     },
   );
+}
+
+function toJSON(value) {
+  return JSON.parse(JSON.stringify(value));
 }
