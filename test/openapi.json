@@ -42,14 +42,16 @@
 			"get": {
 				"summary": "Find Test",
 				"operationId": "findTest",
-				"parameters": [{
-					"name": "testId",
-					"in": "path",
-					"required": true,
-					"schema":{
-						"type": "integer"
+				"parameters": [
+					{
+						"name": "testId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
 					}
-				}],
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -74,14 +76,16 @@
 			"delete": {
 				"summary": "Delete Test",
 				"operationId": "deleteTest",
-				"parameters": [{
-					"name": "testId",
-					"in": "path",
-					"required": true,
-					"schema":{
-						"type": "string"
+				"parameters": [
+					{
+						"name": "testId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
-				}],
+				],
 				"responses": {
 					"204": {
 						"description": "OK"
@@ -132,6 +136,21 @@
 			"Bearer3": {
 				"type": "http",
 				"scheme": "Bearer"
+			},
+			"Cookie1": {
+				"type": "apiKey",
+				"in": "cookie",
+				"name": "token"
+			},
+			"Query1": {
+				"type": "apiKey",
+				"in": "query",
+				"name": "token"
+			},
+			"Header1": {
+				"type": "apiKey",
+				"in": "header",
+				"name": "X-Token"
 			}
 		},
 		"schemas": {
@@ -184,6 +203,30 @@
 								"$ref": "#/components/schemas/UserName"
 							}
 						}
+					},
+					"Cookie1": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
+					},
+					"Query1": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
+					},
+					"Header1": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"$ref": "#/components/schemas/UserName"
+							}
+						}
 					}
 				}
 			},
@@ -198,6 +241,15 @@
 		},
 		{
 			"Bearer2": []
+		},
+		{
+			"Cookie1": []
+		},
+		{
+			"Query1": []
+		},
+		{
+			"Header1": []
 		}
 	]
 }

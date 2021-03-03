@@ -1,243 +1,357 @@
 const { createOpenApiRouter } = require('../');
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const { expect } = require('chai');
 const nodeFetch = require('node-fetch');
 const openapi = require('./openapi.json');
 const PORT = 58483;
 
 describe('openapi', () => {
-	let app;
+  let app;
 
-	before('express', done => {
-		app = express();
+  before('express', (done) => {
+    app = express();
 
-		const tests = [{ id: 1 }, { id: 2 }];
+    app.use(cookieParser());
 
-		const operations = {
-			deleteTest: () => ({
-				statusCode: 204
-			}),
-			getTests: () => {
-				return {
-					statusCode: 200,
-					content: tests
-				};
-			},
-			findTest: ({ params }) => {
-				return {
-					statusCode: 200,
-					content: tests.find(test => test.id === params.testId)
-				};
-			},
-			getUser: ({ security }) => {
-				return {
-					statusCode: 200,
-					content: security
-				};
-			}
-		};
+    const tests = [{ id: 1 }, { id: 2 }];
 
-		const securitySchemes = {
-			Bearer1: async (credentials) => {
-				if (credentials === 'Jane') {
-					return {
-						name: credentials
-					};
-				}
-			},
-			Bearer2: async (credentials) => {
-				if (credentials === 'John') {
-					return {
-						name: credentials
-					};
-				}
-			},
-			Bearer3: async (credentials) => {
-				if (credentials === 'June') {
-					return {
-						name: credentials
-					};
-				}
-			}
-		};
+    const operations = {
+      deleteTest: () => ({
+        statusCode: 204,
+      }),
+      getTests: () => {
+        return {
+          statusCode: 200,
+          content: tests,
+        };
+      },
+      findTest: ({ params }) => {
+        return {
+          statusCode: 200,
+          content: tests.find((test) => test.id === params.testId),
+        };
+      },
+      getUser: ({ security }) => {
+        return {
+          statusCode: 200,
+          content: security,
+        };
+      },
+    };
 
-		app.use(createOpenApiRouter(openapi, { operations, securitySchemes }));
+    const securitySchemes = {
+      Bearer1: async (credentials) => {
+        if (credentials === 'Jane') {
+          return {
+            name: credentials,
+          };
+        }
+      },
+      Bearer2: async (credentials) => {
+        if (credentials === 'John') {
+          return {
+            name: credentials,
+          };
+        }
+      },
+      Bearer3: async (credentials) => {
+        if (credentials === 'June') {
+          return {
+            name: credentials,
+          };
+        }
+      },
+      Cookie1: async (apiKey) => {
+        if (apiKey === 'June') {
+          return {
+            name: apiKey,
+          };
+        }
+      },
+      Query1: async (apiKey) => {
+        if (apiKey === 'June') {
+          return {
+            name: apiKey,
+          };
+        }
+      },
+      Header1: async (apiKey) => {
+        if (apiKey === 'June') {
+          return {
+            name: apiKey,
+          };
+        }
+      },
+    };
 
-		app.listen(PORT, done);
-	});
+    app.use(createOpenApiRouter(openapi, { operations, securitySchemes }));
 
-	describe('getTests with Jane', () => {
-		let response;
+    app.listen(PORT, done);
+  });
 
-		before(async () => {
-			response = await nodeFetch('http://localhost:58483/tests', {
-				headers: {
-					Accept: 'application/json',
-					Authorization: 'Bearer Jane'
-				}
-			});
-			response.content = await response.json();
-		});
+  describe('getTests with Jane', () => {
+    let response;
 
-		describe('response', () => {
-			describe('statusCode', () => {
-				it('should equal 200', () => {
-					expect(response.status).to.eql(200);
-				});
-			});
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/tests', {
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer Jane',
+        },
+      });
+      response.content = await response.json();
+    });
 
-			describe('content', () => {
-				it('should be an array with two test items', () => {
-					expect(response.content).to.eql([{ id: 1 }, { id: 2 }]);
-				});
-			});
-		});
-	});
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 200', () => {
+          expect(response.status).to.eql(200);
+        });
+      });
 
-	describe('getTests with June', () => {
-		let response;
+      describe('content', () => {
+        it('should be an array with two test items', () => {
+          expect(response.content).to.eql([{ id: 1 }, { id: 2 }]);
+        });
+      });
+    });
+  });
 
-		before(async () => {
-			response = await nodeFetch('http://localhost:58483/tests', {
-				headers: {
-					Accept: 'application/json',
-					Authorization: 'Bearer June'
-				}
-			});
-			response.content = await response.json();
-		});
+  describe('getTests with June', () => {
+    let response;
 
-		describe('response', () => {
-			describe('statusCode', () => {
-				it('should equal 401', () => {
-					expect(response.status).to.eql(401);
-				});
-			});
-		});
-	});
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/tests', {
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer June',
+        },
+      });
+      response.content = await response.json();
+    });
 
-	describe('findTest with John', () => {
-		let response;
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 401', () => {
+          expect(response.status).to.eql(401);
+        });
+      });
+    });
+  });
 
-		before(async () => {
-			response = await nodeFetch('http://localhost:58483/tests/2', {
-				headers: {
-					Accept: 'application/json',
-					Authorization: 'Bearer John'
-				}
-			});
-			response.content = await response.json();
-		});
+  describe('findTest with John', () => {
+    let response;
 
-		describe('response', () => {
-			describe('statusCode', () => {
-				it('should equal 200', () => {
-					expect(response.status).to.eql(200);
-				});
-			});
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/tests/2', {
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer John',
+        },
+      });
+      response.content = await response.json();
+    });
 
-			describe('content', () => {
-				it('should be an object', () => {
-					expect(response.content).to.eql({ id: 2 });
-				});
-			});
-		});
-	});
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 200', () => {
+          expect(response.status).to.eql(200);
+        });
+      });
 
-	describe('findTest with June', () => {
-		let response;
+      describe('content', () => {
+        it('should be an object', () => {
+          expect(response.content).to.eql({ id: 2 });
+        });
+      });
+    });
+  });
 
-		before(async () => {
-			response = await nodeFetch('http://localhost:58483/tests/2', {
-				headers: {
-					Accept: 'application/json',
-					Authorization: 'Bearer June'
-				}
-			});
-			response.content = await response.json();
-		});
+  describe('findTest with June', () => {
+    let response;
 
-		describe('response', () => {
-			describe('statusCode', () => {
-				it('should equal 401', () => {
-					expect(response.status).to.eql(401);
-				});
-			});
-		});
-	});
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/tests/2', {
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer June',
+        },
+      });
+      response.content = await response.json();
+    });
 
-	describe('deleteTest with June', () => {
-		let response;
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 401', () => {
+          expect(response.status).to.eql(401);
+        });
+      });
+    });
+  });
 
-		before(async () => {
-			response = await nodeFetch('http://localhost:58483/tests/1', {
-				method: 'DELETE',
-				headers: {
-					Authorization: 'Bearer June'
-				}
-			});
-		});
+  describe('deleteTest with June', () => {
+    let response;
 
-		describe('response', () => {
-			describe('statusCode', () => {
-				it('should equal 204', () => {
-					expect(response.status).to.eql(204);
-				});
-			});
-		});
-	});
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/tests/1', {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Bearer June',
+        },
+      });
+    });
 
-	describe('get user with June', () => {
-		let response;
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 204', () => {
+          expect(response.status).to.eql(204);
+        });
+      });
+    });
+  });
 
-		before(async () => {
-			response = await nodeFetch('http://localhost:58483/user', {
-				method: 'GET',
-				headers: {
-					Accept: 'application/json',
-					Authorization: 'Bearer June'
-				}
-			});
+  describe('get user with June', () => {
+    let response;
 
-			response.content = await response.json();
-		});
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/user', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer June',
+        },
+      });
 
-		describe('response', () => {
-			describe('statusCode', () => {
-				it('should equal 401', () => {
-					expect(response.status).to.eql(401);
-				});
-			});
-		});
-	});
+      response.content = await response.json();
+    });
 
-	describe('get user with Jane', () => {
-		let response;
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 401', () => {
+          expect(response.status).to.eql(401);
+        });
+      });
+    });
+  });
 
-		before(async () => {
-			response = await nodeFetch('http://localhost:58483/user', {
-				method: 'GET',
-				headers: {
-					Accept: 'application/json',
-					Authorization: 'Bearer Jane'
-				}
-			});
+  describe('get user with Jane', () => {
+    let response;
 
-			response.content = await response.json();
-		});
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/user', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer Jane',
+        },
+      });
 
-		describe('response', () => {
-			describe('statusCode', () => {
-				it('should equal 200', () => {
-					expect(response.status).to.eql(200);
-				});
-			});
+      response.content = await response.json();
+    });
 
-			describe('content', () => {
-				it('should be a user object', () => {
-					expect(response.content).to.eql({ Bearer1: { name: 'Jane' } });
-				});
-			});
-		});
-	});
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 200', () => {
+          expect(response.status).to.eql(200);
+        });
+      });
+
+      describe('content', () => {
+        it('should be a user object', () => {
+          expect(response.content).to.eql({ Bearer1: { name: 'Jane' } });
+        });
+      });
+    });
+  });
+
+  describe('get user with June token cookie', () => {
+    let response;
+
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/user', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Cookie: 'token=June',
+        },
+        credentials: 'include',
+      });
+
+      response.content = await response.json();
+    });
+
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 200', () => {
+          expect(response.status).to.eql(200);
+        });
+      });
+
+      describe('content', () => {
+        it('should be a user object', () => {
+          expect(response.content).to.eql({ Cookie1: { name: 'June' } });
+        });
+      });
+    });
+  });
+
+  describe('get user with June X-Token header', () => {
+    let response;
+
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/user', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'X-Token': 'June',
+        },
+      });
+
+      response.content = await response.json();
+    });
+
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 200', () => {
+          expect(response.status).to.eql(200);
+        });
+      });
+
+      describe('content', () => {
+        it('should be a user object', () => {
+          expect(response.content).to.eql({ Header1: { name: 'June' } });
+        });
+      });
+    });
+  });
+
+  describe('get user with June token query string parameter', () => {
+    let response;
+
+    before(async () => {
+      response = await nodeFetch('http://localhost:58483/user?token=June', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      response.content = await response.json();
+    });
+
+    describe('response', () => {
+      describe('statusCode', () => {
+        it('should equal 200', () => {
+          expect(response.status).to.eql(200);
+        });
+      });
+
+      describe('content', () => {
+        it('should be a user object', () => {
+          expect(response.content).to.eql({ Query1: { name: 'June' } });
+        });
+      });
+    });
+  });
 });

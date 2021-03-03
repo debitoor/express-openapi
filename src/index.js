@@ -87,7 +87,18 @@ function createOpenApiRouter(
 
               for (let securitySchemeName in securitySchemeNames) {
                 const securityScheme = openapi.components.securitySchemes[securitySchemeName];
+
+                if (securityScheme === undefined) {
+                  throw new Error(`Security Scheme "${securitySchemeName}" Not Found`);
+                }
+
                 const securitySchemeHandler = securitySchemes[securitySchemeName];
+
+                if (securitySchemeHandler === undefined) {
+                  throw new Error(
+                    `Security Scheme Handler "${securitySchemeName}" Not Implemented`,
+                  );
+                }
 
                 try {
                   security[securitySchemeName] = await checkSecurityScheme(
@@ -111,44 +122,28 @@ function createOpenApiRouter(
 
             async function checkSecurityScheme(securityScheme, securitySchemeHandler) {
               if (!securityScheme) {
-                throw new Error('Security Scheme Not Supported');
+                throw new Error('Security Scheme Not Found');
               }
 
               if (!securitySchemeHandler) {
-                throw new Error('Security Scheme Not Supported');
+                throw new Error('Security Scheme Not Implemented');
               }
 
               switch (securityScheme.type) {
+                case 'apiKey':
+                  return apiKeySecurityScheme(securityScheme, securitySchemeHandler)(req);
                 case 'http':
-                  const authorizationHeader = req.get('Authorization');
-
-                  if (authorizationHeader == null) {
-                    throw new Error('Authorization Header Missing');
-                  }
-
-                  const [type, credentials] = authorizationHeader.split(' ');
-
-                  if (type !== securityScheme.scheme) {
-                    throw new Error('Authorization Header Type Not Supported');
-                  }
-
-                  if (credentials === undefined) {
-                    throw new Error('Authorization Header Credentials Missing');
-                  }
-
-                  const credentialsPayload = await securitySchemeHandler(credentials);
-
-                  if (credentialsPayload == null) {
-                    throw new Error('Authorization Header Credentials Invalid');
-                  }
-
-                  return credentialsPayload;
+                  return httpSecurityScheme(securityScheme, securitySchemeHandler)(req);
+                case 'oauth2':
+                  throw new Error('OAuth2 Security Scheme Type Not Supported');
+                case 'openIdConnect':
+                  throw new Error('OpenID Security Scheme Type Not Supported');
                 default:
-                  throw new Error('Security Scheme Type Not Supported');
+                  throw new Error('Invalid Security Scheme Type');
               }
             }
 
-            debug('hasMetOperationSecurityRequirements: %b', hasMetOperationSecurityRequirements);
+            debug('hasMetOperationSecurityRequirements: %s', hasMetOperationSecurityRequirements);
 
             if (!hasMetOperationSecurityRequirements) {
               return {
@@ -268,4 +263,60 @@ function parametersToSchema(parameters) {
 
 function toJSON(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function apiKeySecurityScheme(securityScheme, securitySchemeHandler) {
+  return async function (req) {
+    console.log(securityScheme);
+
+    let apiKey;
+
+    if (securityScheme.in === 'cookie') {
+      apiKey = req.cookies[securityScheme.name];
+    } else if (securityScheme.in === 'header') {
+      apiKey = req.get(securityScheme.name);
+    } else if (securityScheme.in === 'query') {
+      apiKey = req.query[securityScheme.name];
+    }
+
+    if (apiKey === undefined) {
+      throw new Error('API Key Missing');
+    }
+
+    const apiKeyPayload = await securitySchemeHandler(apiKey);
+
+    if (apiKeyPayload == null) {
+      throw new Error('API Key Invalid');
+    }
+
+    return apiKeyPayload;
+  };
+}
+
+function httpSecurityScheme(securityScheme, securitySchemeHandler) {
+  return async function (req) {
+    const authorizationHeader = req.get('Authorization');
+
+    if (authorizationHeader == null) {
+      throw new Error('Authorization Header Missing');
+    }
+
+    const [type, credentials] = authorizationHeader.split(' ');
+
+    if (type !== securityScheme.scheme) {
+      throw new Error('Authorization Header Type Not Supported');
+    }
+
+    if (credentials === undefined) {
+      throw new Error('Authorization Header Credentials Missing');
+    }
+
+    const credentialsPayload = await securitySchemeHandler(credentials);
+
+    if (credentialsPayload == null) {
+      throw new Error('Authorization Header Credentials Invalid');
+    }
+
+    return credentialsPayload;
+  };
 }
