@@ -267,8 +267,6 @@ function toJSON(value) {
 
 function apiKeySecurityScheme(securityScheme, securitySchemeHandler) {
   return async function (req) {
-    console.log(securityScheme);
-
     let apiKey;
 
     if (securityScheme.in === 'cookie') {
