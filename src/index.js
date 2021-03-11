@@ -6,7 +6,7 @@ module.exports.createOpenApiRouter = createOpenApiRouter;
 
 function createOpenApiRouter(
   openapi,
-  { operations = {}, securitySchemes = {}, schemas = [] } = {},
+  { operations = {}, securitySchemes = {}, schemas = [], context } = {},
 ) {
   const ajv = new Ajv({
     $data: true,
@@ -166,6 +166,7 @@ function createOpenApiRouter(
               query,
               body,
               security,
+              context,
             });
 
             debug('response === %O', response);
