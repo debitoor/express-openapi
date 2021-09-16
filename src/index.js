@@ -302,7 +302,7 @@ function httpSecurityScheme(securityScheme, securitySchemeHandler) {
 
     const [type, credentials] = authorizationHeader.split(' ');
 
-    if (type !== securityScheme.scheme) {
+    if (type.toLowerCase() !== securityScheme.scheme.toLowerCase()) {
       throw new Error('Authorization Header Type Not Supported');
     }
 
