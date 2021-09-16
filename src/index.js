@@ -131,9 +131,9 @@ function createOpenApiRouter(
 
               switch (securityScheme.type) {
                 case 'apiKey':
-                  return apiKeySecurityScheme(securityScheme, securitySchemeHandler)(req);
+                  return apiKeySecurityScheme(securityScheme, securitySchemeHandler, context)(req);
                 case 'http':
-                  return httpSecurityScheme(securityScheme, securitySchemeHandler)(req);
+                  return httpSecurityScheme(securityScheme, securitySchemeHandler, context)(req);
                 case 'oauth2':
                   throw new Error('OAuth2 Security Scheme Type Not Supported');
                 case 'openIdConnect':
@@ -266,7 +266,7 @@ function toJSON(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function apiKeySecurityScheme(securityScheme, securitySchemeHandler) {
+function apiKeySecurityScheme(securityScheme, securitySchemeHandler, context) {
   return async function (req) {
     let apiKey;
 
@@ -282,7 +282,7 @@ function apiKeySecurityScheme(securityScheme, securitySchemeHandler) {
       throw new Error('API Key Missing');
     }
 
-    const apiKeyPayload = await securitySchemeHandler(apiKey);
+    const apiKeyPayload = await securitySchemeHandler({ apiKey, context });
 
     if (apiKeyPayload == null) {
       throw new Error('API Key Invalid');
@@ -292,7 +292,7 @@ function apiKeySecurityScheme(securityScheme, securitySchemeHandler) {
   };
 }
 
-function httpSecurityScheme(securityScheme, securitySchemeHandler) {
+function httpSecurityScheme(securityScheme, securitySchemeHandler, context) {
   return async function (req) {
     const authorizationHeader = req.get('Authorization');
 
@@ -310,7 +310,7 @@ function httpSecurityScheme(securityScheme, securitySchemeHandler) {
       throw new Error('Authorization Header Credentials Missing');
     }
 
-    const credentialsPayload = await securitySchemeHandler(credentials);
+    const credentialsPayload = await securitySchemeHandler({ credentials, context });
 
     if (credentialsPayload == null) {
       throw new Error('Authorization Header Credentials Invalid');

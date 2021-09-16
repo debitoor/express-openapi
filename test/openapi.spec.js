@@ -41,42 +41,42 @@ describe('openapi', () => {
     };
 
     const securitySchemes = {
-      Bearer1: async (credentials) => {
+      Bearer1: async ({ credentials }) => {
         if (credentials === 'Jane') {
           return {
             name: credentials,
           };
         }
       },
-      Bearer2: async (credentials) => {
+      Bearer2: async ({ credentials }) => {
         if (credentials === 'John') {
           return {
             name: credentials,
           };
         }
       },
-      Bearer3: async (credentials) => {
+      Bearer3: async ({ credentials }) => {
         if (credentials === 'June') {
           return {
             name: credentials,
           };
         }
       },
-      Cookie1: async (apiKey) => {
+      Cookie1: async ({ apiKey }) => {
         if (apiKey === 'June') {
           return {
             name: apiKey,
           };
         }
       },
-      Query1: async (apiKey) => {
+      Query1: async ({ apiKey }) => {
         if (apiKey === 'June') {
           return {
             name: apiKey,
           };
         }
       },
-      Header1: async (apiKey) => {
+      Header1: async ({ apiKey }) => {
         if (apiKey === 'June') {
           return {
             name: apiKey,
